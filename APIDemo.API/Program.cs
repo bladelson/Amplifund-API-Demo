@@ -1,4 +1,8 @@
+using APIDemo.API.DTO;
 using APIDemo.Database;
+using APIDemo.Database.Models;
+using Azure;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,25 +35,81 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("/health", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return Results.Ok();
 })
-.WithName("GetWeatherForecast")
+.WithName("Health")
 .WithOpenApi();
+
+app.MapGet("/todo", async Task<Ok<List<TodoItem>>> (APIDemoContext db, int limit = 100) =>
+{
+    var todos = await db.TodoItems
+                .OrderBy(x => x.Created)
+                .Take(limit)
+                .ToListAsync();
+
+    return TypedResults.Ok(todos);
+})
+.WithOpenApi(o => new(o) { Summary = "Get All Todo Items" });
+
+app.MapGet("/todo/{id}", async Task<Results<NotFound<Error>, Ok<TodoItem>>> (APIDemoContext db, int id) =>
+{
+    var todo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
+    if (todo == null)
+        return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
+
+    return TypedResults.Ok(todo);
+})
+.WithOpenApi(o => new(o) { Summary = "Get Todo Item by id" });
+
+app.MapPut("/todo/{id}", async Task<Results<NotFound<Error>, BadRequest<Error>, Ok<TodoItem>>> (APIDemoContext db, int id, NewTodoItem todo) =>
+{
+    if (!todo.IsValid())
+        return TypedResults.BadRequest(new Error("Invalid Title or Description"));
+
+    var dbTodo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
+    if (dbTodo == null)
+        return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
+
+    dbTodo.Title = todo.Title;
+    dbTodo.Description = todo.Description;
+    dbTodo.Modified = DateTimeOffset.UtcNow;
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(dbTodo);
+})
+.WithOpenApi(o => new(o) { Summary = "Update Todo Item by id" }); ;
+
+app.MapPost("/todo", async Task<Results<Ok<TodoItem>, BadRequest<Error>>> (APIDemoContext db, NewTodoItem todo) =>
+{
+    if (!todo.IsValid())
+        return TypedResults.BadRequest(new Error("Invalid Title or Description"));
+
+    var newTodo = new TodoItem()
+    {
+        Title = todo.Title,
+        Description = todo.Description
+    };
+    db.TodoItems.Add(newTodo);
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(newTodo);
+})
+.WithOpenApi(o => new(o) { Summary = "Create New Todo Item" });
+
+app.MapDelete("/todo/{id}", async Task<Results<Ok, NotFound<Error>>> (APIDemoContext db, int id) =>
+{
+    var todo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
+    if (todo == null)
+        return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
+
+    db.TodoItems.Remove(todo);
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok();
+})
+.WithOpenApi(o => new(o) { Summary = "Delete Todo Item by id" });
 
 app.Run();
 
