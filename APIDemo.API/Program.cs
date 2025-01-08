@@ -117,3 +117,6 @@ app.MapDelete("/todo/{id}", async Task<Results<Ok, NotFound<Error>>> (APIDemoCon
 .WithOpenApi(o => new(o) { Summary = "Delete Todo Item by id" });
 
 app.Run();
+
+// Make the implicit Program class public so test projects can access it
+public partial class Program { }

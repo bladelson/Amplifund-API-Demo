@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIDemo.Database", "APIDemo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIDemo.API", "APIDemo.API\APIDemo.API.csproj", "{71FCABA9-1A1C-420A-92B5-E11822DE6A9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIDemo.Tests", "APIDemo.Tests\APIDemo.Tests.csproj", "{F7FF32C5-0505-4B0B-B4D2-BAB7A1773A51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{71FCABA9-1A1C-420A-92B5-E11822DE6A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71FCABA9-1A1C-420A-92B5-E11822DE6A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71FCABA9-1A1C-420A-92B5-E11822DE6A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7FF32C5-0505-4B0B-B4D2-BAB7A1773A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7FF32C5-0505-4B0B-B4D2-BAB7A1773A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7FF32C5-0505-4B0B-B4D2-BAB7A1773A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7FF32C5-0505-4B0B-B4D2-BAB7A1773A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
