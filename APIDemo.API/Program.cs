@@ -21,6 +21,7 @@ var app = builder.Build();
 //apply migration on startup
 using (var scope = app.Services.CreateScope())
 {
+    await Task.Delay(TimeSpan.FromSeconds(10)); //give db container some time to startup :(
     var context = scope.ServiceProvider.GetRequiredService<APIDemoContext>();
     context.Database.Migrate();
 }
