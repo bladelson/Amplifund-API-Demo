@@ -1,14 +1,10 @@
 using APIDemo.API.DTO;
 using APIDemo.Database;
 using APIDemo.Database.Models;
-using Azure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,7 +18,7 @@ builder.Services.AddDbContext<APIDemoContext>(options =>
 
 var app = builder.Build();
 
-//apply migration
+//apply migration on startup
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<APIDemoContext>();
@@ -40,10 +36,9 @@ app.UseHttpsRedirection();
 
 app.MapGet("/health", () =>
 {
-    return Results.Ok();
+    return Results.Ok("alive");
 })
-.WithName("Health")
-.WithOpenApi();
+.WithOpenApi(o => new(o) { Summary = "Health" });
 
 app.MapGet("/todo", async Task<Ok<List<TodoItem>>> (APIDemoContext db, int limit = 100) =>
 {

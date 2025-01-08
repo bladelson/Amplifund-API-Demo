@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace APIDemo.Tests
 {
@@ -20,6 +19,8 @@ namespace APIDemo.Tests
                 {
                     o.UseInMemoryDatabase(_database);
                 });
+
+                //todo seed data for more complete testing
             });
         }
     }
