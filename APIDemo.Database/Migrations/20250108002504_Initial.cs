@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace APIDemo.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class TodoItemTable : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,8 @@ namespace APIDemo.Database.Migrations
                     Title = table.Column<string>(type: "nvarchar(512)", nullable: false, defaultValue: ""),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: ""),
                     Created = table.Column<DateTimeOffset>(type: "datetimeoffset(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    Modified = table.Column<DateTimeOffset>(type: "datetimeoffset(3)", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    Modified = table.Column<DateTimeOffset>(type: "datetimeoffset(3)", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Deleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,7 +36,7 @@ namespace APIDemo.Database.Migrations
                 name: "IX_TodoItem_Created",
                 schema: "APIDemo",
                 table: "TodoItem",
-                column: "Created")
+                columns: new[] { "Deleted", "Created" })
                 .Annotation("SqlServer:FillFactor", 100)
                 .Annotation("SqlServer:Online", true);
         }

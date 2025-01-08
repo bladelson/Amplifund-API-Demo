@@ -12,9 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<APIDemoContext>(o =>
+builder.Services.AddDbContext<APIDemoContext>(options =>
 {
-    o.UseSqlServer(builder.Configuration.GetRequiredSection("DatabaseConnection").Value);
+    options.UseSqlServer(builder.Configuration.GetRequiredSection("DatabaseConnection").Value, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure();
+    });
 });
 
 var app = builder.Build();
@@ -45,6 +48,7 @@ app.MapGet("/health", () =>
 app.MapGet("/todo", async Task<Ok<List<TodoItem>>> (APIDemoContext db, int limit = 100) =>
 {
     var todos = await db.TodoItems
+                .Where(x => !x.Deleted)
                 .OrderBy(x => x.Created)
                 .Take(limit)
                 .ToListAsync();
@@ -55,7 +59,7 @@ app.MapGet("/todo", async Task<Ok<List<TodoItem>>> (APIDemoContext db, int limit
 
 app.MapGet("/todo/{id}", async Task<Results<NotFound<Error>, Ok<TodoItem>>> (APIDemoContext db, int id) =>
 {
-    var todo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
+    var todo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id && !x.Deleted);
     if (todo == null)
         return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
 
@@ -68,7 +72,7 @@ app.MapPut("/todo/{id}", async Task<Results<NotFound<Error>, BadRequest<Error>, 
     if (!todo.IsValid())
         return TypedResults.BadRequest(new Error("Invalid Title or Description"));
 
-    var dbTodo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
+    var dbTodo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id && !x.Deleted);
     if (dbTodo == null)
         return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
 
@@ -100,11 +104,12 @@ app.MapPost("/todo", async Task<Results<Ok<TodoItem>, BadRequest<Error>>> (APIDe
 
 app.MapDelete("/todo/{id}", async Task<Results<Ok, NotFound<Error>>> (APIDemoContext db, int id) =>
 {
-    var todo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id);
-    if (todo == null)
+    var dbTodo = await db.TodoItems.FirstOrDefaultAsync(x => x.Id == id && !x.Deleted);
+    if (dbTodo == null)
         return TypedResults.NotFound(new Error($"Todo Item with id {id} not found."));
 
-    db.TodoItems.Remove(todo);
+    dbTodo.Deleted = true;
+    dbTodo.Modified = DateTimeOffset.UtcNow;
     await db.SaveChangesAsync();
 
     return TypedResults.Ok();
@@ -112,8 +117,3 @@ app.MapDelete("/todo/{id}", async Task<Results<Ok, NotFound<Error>>> (APIDemoCon
 .WithOpenApi(o => new(o) { Summary = "Delete Todo Item by id" });
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

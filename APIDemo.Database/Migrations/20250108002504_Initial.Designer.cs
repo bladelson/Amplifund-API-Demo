@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIDemo.Database.Migrations
 {
     [DbContext(typeof(APIDemoContext))]
-    [Migration("20250107214437_TodoItemTable")]
-    partial class TodoItemTable
+    [Migration("20250108002504_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace APIDemo.Database.Migrations
                         .HasColumnType("datetimeoffset(3)")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -58,11 +61,11 @@ namespace APIDemo.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Created")
+                    b.HasIndex("Deleted", "Created")
                         .HasDatabaseName("IX_TodoItem_Created")
                         .HasAnnotation("SqlServer:Online", true);
 
-                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex("Created"), 100);
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex("Deleted", "Created"), 100);
 
                     b.ToTable("TodoItem", "APIDemo");
                 });

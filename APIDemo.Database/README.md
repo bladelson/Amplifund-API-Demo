@@ -1,5 +1,5 @@
 # Create a Migration
-dotnet ef --startup-project .\APIDemo.API\APIDemo.API.csproj migrations add NEW_MIGRATION -p APIDemo.Database\APIDemo.Database.csproj -o Migrations --context APIDemoContext
+dotnet ef --startup-project .\APIDemo.API\APIDemo.API.csproj migrations add Initial -p APIDemo.Database\APIDemo.Database.csproj -o Migrations --context APIDemoContext
 
 # Update Database
 dotnet ef --startup-project .\APIDemo.API\APIDemo.API.csproj --project APIDemo.Database\APIDemo.Database.csproj database update --context APIDemoContext

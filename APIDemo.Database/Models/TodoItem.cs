@@ -12,5 +12,6 @@ namespace APIDemo.Database.Models
         public string Description { get; set; } = default!;
         public DateTimeOffset Created { get; set; } = default;
         public DateTimeOffset Modified { get; set; } = default;
+        public bool Deleted { get; set; }
     }
 }

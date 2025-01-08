@@ -51,7 +51,12 @@ namespace APIDemo.Database.Configuration
                .HasSentinel(default(DateTimeOffset));
 
             builder
-                .HasIndex(x => new { x.Created })
+                .Property(x => x.Deleted)
+                .HasColumnType("bit")
+                .IsRequired();
+
+            builder
+                .HasIndex(x => new { x.Deleted, x.Created })
                 .HasDatabaseName("IX_TodoItem_Created")
                 .IsCreatedOnline(true)
                 .HasFillFactor(100);

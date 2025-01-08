@@ -36,6 +36,9 @@ namespace APIDemo.Database.Migrations
                         .HasColumnType("datetimeoffset(3)")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -55,11 +58,11 @@ namespace APIDemo.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Created")
+                    b.HasIndex("Deleted", "Created")
                         .HasDatabaseName("IX_TodoItem_Created")
                         .HasAnnotation("SqlServer:Online", true);
 
-                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex("Created"), 100);
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex("Deleted", "Created"), 100);
 
                     b.ToTable("TodoItem", "APIDemo");
                 });
